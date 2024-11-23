@@ -1,3 +1,4 @@
+import { registerVisitor } from "@/api/visitorApi";
 import { FormField } from "@/components/FormInput";
 import { borderRadius, COLORS, fontSize, spacing } from "@/constants";
 import {
@@ -8,6 +9,7 @@ import { useVisitorRegistrationStore } from "@/store/VisitorRegistrationStore";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
   Image,
   ScrollView,
   StyleSheet,
@@ -19,7 +21,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ZodError } from "zod";
 
 const VisitorRegistration = () => {
-  const updateStore = useVisitorRegistrationStore((state) => state.setFormData);
+  const updateStore = useVisitorRegistrationStore(
+    (state) => state.setVisitorId
+  );
   const [formData, setFormData] = useState<visitorRegistrationType>({
     name: "",
     email: "",
@@ -35,6 +39,8 @@ const VisitorRegistration = () => {
     phoneNumber: "",
     visitingPersonName: "",
   });
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleFieldChange = (
     field: keyof visitorRegistrationType,
@@ -75,81 +81,97 @@ const VisitorRegistration = () => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const isFormValid = formValidation();
 
     if (isFormValid) {
-      updateStore(formData);
-      router.push("./OTPAuth");
+      setIsLoading(true);
+      const response = await registerVisitor(formData);
+
+      console.log("response in index", response.data);
+      if (response.success === "OK") {
+        updateStore(response.data[0].id);
+        router.push("./OTPAuth");
+      }
+      setIsLoading(false);
     }
+
     console.log(isFormValid);
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.contentContainer}
-      >
-        <View style={styles.formContainer}>
-          <Image
-            source={require("../assets/images/avatar.png")}
-            style={styles.logo}
-            accessibilityLabel="Company logo"
-          />
-          <Text style={styles.title}>Visitor Pass Registration</Text>
-
-          <View style={styles.inputContainer}>
-            <FormField
-              label="Full Name"
-              value={formData.name}
-              onChangeText={(value) => handleFieldChange("name", value)}
-              error={errors.name}
-              placeholder="John Doe"
-              required
-            />
-
-            <FormField
-              label="Email Address"
-              value={formData.email}
-              onChangeText={(value) => handleFieldChange("email", value)}
-              error={errors.email}
-              keyboardType="email-address"
-              placeholder="john.doe@example.com"
-              required
-            />
-
-            <FormField
-              label="Phone Number"
-              value={formData.phoneNumber}
-              onChangeText={(value) => handleFieldChange("phoneNumber", value)}
-              error={errors.phoneNumber}
-              keyboardType="phone-pad"
-              placeholder="+91 98765 43210"
-              required
-            />
-
-            <FormField
-              label="Visiting Person Name"
-              value={formData.visitingPersonName}
-              onChangeText={(value) =>
-                handleFieldChange("visitingPersonName", value)
-              }
-              error={errors.visitingPersonName}
-              placeholder="Contacting person full name"
-              required
-            />
-          </View>
-
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleSubmit}
-            accessibilityLabel="Submit registration form"
-          >
-            <Text style={styles.buttonText}>Next</Text>
-          </TouchableOpacity>
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={COLORS.slate} />
         </View>
-      </ScrollView>
+      ) : (
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={styles.contentContainer}
+        >
+          <View style={styles.formContainer}>
+            <Image
+              source={require("../assets/images/avatar.png")}
+              style={styles.logo}
+              accessibilityLabel="Company logo"
+            />
+            <Text style={styles.title}>Visitor Pass Registration</Text>
+
+            <View style={styles.inputContainer}>
+              <FormField
+                label="Full Name"
+                value={formData.name}
+                onChangeText={(value) => handleFieldChange("name", value)}
+                error={errors.name}
+                placeholder="John Doe"
+                required
+              />
+
+              <FormField
+                label="Email Address"
+                value={formData.email}
+                onChangeText={(value) => handleFieldChange("email", value)}
+                error={errors.email}
+                keyboardType="email-address"
+                placeholder="john.doe@example.com"
+                required
+              />
+
+              <FormField
+                label="Phone Number"
+                value={formData.phoneNumber}
+                onChangeText={(value) =>
+                  handleFieldChange("phoneNumber", value)
+                }
+                error={errors.phoneNumber}
+                keyboardType="phone-pad"
+                placeholder="+91 98765 43210"
+                required
+              />
+
+              <FormField
+                label="Visiting Person Name"
+                value={formData.visitingPersonName}
+                onChangeText={(value) =>
+                  handleFieldChange("visitingPersonName", value)
+                }
+                error={errors.visitingPersonName}
+                placeholder="Contacting person full name"
+                required
+              />
+            </View>
+
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleSubmit}
+              accessibilityLabel="Submit registration form"
+            >
+              <Text style={styles.buttonText}>Next</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 };
@@ -160,6 +182,12 @@ const styles = StyleSheet.create({
   safeArea: {
     backgroundColor: COLORS.black,
     flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: COLORS.background,
   },
   container: {
     flex: 1,

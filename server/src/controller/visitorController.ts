@@ -8,29 +8,27 @@ import {
 } from "../helpers/validation";
 
 export const createVisitor = async (req: Request, res: Response) => {
-  const validationResult = handleValidation(req.body);
-
-  if (!validationResult.success) {
-    return res.status(400).json({ errors: validationResult.errors });
-  }
-
-  const data = validationResult.data as VisitorRegistrationType;
-
   try {
+    const validationResult = handleValidation(req.body);
+
+    if (!validationResult.success) {
+      return res.status(400).json({ errors: validationResult.errors });
+    }
+
+    const data = validationResult.data as VisitorRegistrationType;
+
     const visitorData = {
       ...data,
       id: nanoid(21),
     };
 
-        // @ts-ignore - Ignore type error for the returning() method
+    // @ts-ignore - Ignore type error for the returning() method
 
     const result = await db.insert(visitors).values(visitorData).returning();
 
-    console.log("result", result);
-
     return res
       .status(201)
-      .json({ message: "OTP sent successfully", data: result });
+      .json({ success: "OK", message: "OTP sent successfully", data: result });
   } catch (error: unknown) {
     const errorMessage =
       error instanceof Error ? error.message : "An unknown error occurred";

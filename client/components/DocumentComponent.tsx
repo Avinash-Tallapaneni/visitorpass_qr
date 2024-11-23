@@ -14,7 +14,7 @@ const DocumentComponent = () => {
   const handlePickDocument = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        type: "*/*",
+        type: "application/pdf",
         copyToCacheDirectory: false,
         multiple: false,
       });
@@ -32,15 +32,7 @@ const DocumentComponent = () => {
   };
 
   const handleUploadDocument = () => {
-    // if (capturedSelfie && uploadedDocument) {
-    //   console.log("Uploading selfie:", capturedSelfie.substring(0, 50) + "...");
-    // console.log("Uploading document:", uploadedDocument);
-    // Implement your upload logic here
-    // } else {
-    //   console.log(
-    //     "Please capture a selfie and upload a document before proceeding."
-    //   );
-    // }
+     
   };
 
   return (
