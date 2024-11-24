@@ -1,7 +1,18 @@
 import cors from "cors";
 import express, { Request, Response } from "express";
 import visitorRoute from "./routes/visitorRoute";
-import fileUploadRoute from "./routes/fileUploadRoute"
+import { createRouteHandler } from "uploadthing/express";
+import { fileUploadRouter } from "./routes/fileUploadRoute";
+import fileUploadRouter2 from "./routes/fileUploadRoute2";
+
+import { config } from "dotenv";
+
+const envFile =
+  process.env.NODE_ENV === "production"
+    ? ".env.production"
+    : ".env.development";
+
+config({ path: envFile });
 
 const app = express();
 app.use(express.json({ limit: "10mb" }));
@@ -36,6 +47,13 @@ app.get("/health", (req: Request, res: Response) => {
 
 app.use("/api/visitors", visitorRoute);
 
-app.use("/api/fileUpload", fileUploadRoute);
+app.use(
+  "/api/fileUpload",
+  createRouteHandler({
+    router: fileUploadRouter,
+  })
+);
+
+// app.use("/api/fileUpload", fileUploadRouter2);
 
 export default app;

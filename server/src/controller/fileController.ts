@@ -21,19 +21,20 @@ export const uploadSelfie = async (req: Request, res: Response) => {
     if (!isBase64(selfie)) {
       return res.status(400).json({ error: "Invalid selfie image format" });
     }
- 
+
     const visitor = await db.select().from(visitors).where(eq(visitors.id, id));
 
-    if (!visitor) {
+    if (!visitor.length) {
       return res.status(404).json({ error: "Visitor not found" });
     }
- 
+
     const updatedVisitor = await db
       .update(visitors)
       .set({ avatar: selfie })
       .where(eq(visitors.id, id))
       .returning();
 
+    console.log("updatedVisitor", updatedVisitor);
     return res.status(200).json({
       message: "Selfie uploaded successfully",
       data: updatedVisitor,
@@ -46,4 +47,7 @@ export const uploadSelfie = async (req: Request, res: Response) => {
   }
 };
 
-export const uploadDocument = async (req: Request, res: Response) => {};
+export const uploadDocument = async (req: Request, res: Response) => {
+  try {
+  } catch (error) {}
+};

@@ -1,27 +1,52 @@
 import { Ionicons } from "@expo/vector-icons";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import React, { useRef, useState } from "react";
-import { StyleSheet, TouchableOpacity, View, Image, Modal } from "react-native";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Image,
+  Modal,
+  ActivityIndicator,
+} from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Text } from "react-native";
-import { borderRadius, COLORS, spacing } from "@/constants";
+import { borderRadius, COLORS, fontSize, spacing } from "@/constants";
+import { uploadSelfie } from "@/api/visitorApi";
+import { useVisitorRegistrationStore } from "@/store/VisitorRegistrationStore";
+import UploadButton from "./uploadButton";
 
 const SelfieComponent = () => {
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [capturedSelfie, setCapturedSelfie] = useState<string | null>(null);
   const cameraRef = useRef<CameraView | null>(null);
   const [permission, requestPermission] = useCameraPermissions();
+  const { visitorId } = useVisitorRegistrationStore();
+  const [isUploading, setIsUploading] = useState(false);
 
-  const handleTakeSelfie = () => {
-    if (permission?.granted) {
-      setIsCameraActive(true);
-    } else {
-      requestPermission();
-    }
-  };
+  // const handleTakeSelfie = () => {
+  //   if (permission?.granted) {
+  //     setIsCameraActive(true);
+  //   } else {
+  //     requestPermission();
+  //   }
+  // };
 
   const handleClose = () => {
     setIsCameraActive(false);
+  };
+
+  const handleUpload = async () => {
+    if (capturedSelfie && visitorId) {
+      console.log("Uploading selfie...");
+      setIsUploading(true);
+      const response = await uploadSelfie({
+        id: visitorId,
+        selfie: capturedSelfie,
+      });
+      console.log(response.data);
+      setIsUploading(false);
+    }
   };
 
   const handleCapture = async () => {
@@ -33,7 +58,8 @@ const SelfieComponent = () => {
           exif: false,
         });
         if (photo?.base64) {
-          setCapturedSelfie(`data:image/jpeg;base64,${photo.base64}`);
+          // setCapturedSelfie(`data:image/jpeg;base64,${photo.base64}`);
+          setCapturedSelfie(photo.base64);
           setIsCameraActive(false);
         }
       } catch (error) {
@@ -55,7 +81,7 @@ const SelfieComponent = () => {
                 <View style={styles.captureButtonInner} />
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.closeButton}
+                style={styles.cameraCloseButton}
                 onPress={handleClose}
               >
                 <Ionicons name="close" size={30} color={COLORS.white} />
@@ -67,33 +93,55 @@ const SelfieComponent = () => {
 
       <View style={styles.optionsContainer}>
         {capturedSelfie ? (
-          <View style={styles.previewContainer}>
-            <Image
-              source={{ uri: capturedSelfie }}
-              style={styles.previewImage}
-            />
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setCapturedSelfie(null)}
-            >
-              <Ionicons name="close" size={30} color={COLORS.white} />
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <TouchableOpacity
-            style={styles.option}
-            onPress={handleTakeSelfie}
-            accessibilityLabel="Take selfie with camera"
-          >
-            <View style={styles.iconContainer}>
-              <MaterialCommunityIcons
-                name="camera-outline"
-                size={40}
-                color={COLORS.slate}
+          <>
+            <View style={styles.previewContainer}>
+              <Image
+                source={{ uri: `data:image/jpeg;base64,${capturedSelfie}` }}
+                style={styles.previewImage}
               />
+              <TouchableOpacity
+                style={styles.previewCloseButton}
+                onPress={() => setCapturedSelfie(null)}
+              >
+                <Ionicons name="close" size={30} color={COLORS.white} />
+              </TouchableOpacity>
             </View>
-            <Text style={styles.optionText}>Take Selfie{"\n"}with Camera</Text>
-          </TouchableOpacity>
+
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={[styles.button, styles.uploadButton]}
+                onPress={handleUpload}
+                accessibilityLabel="Upload photo"
+              >
+                <Text style={styles.uploadButtonText}>
+                  {isUploading ? (
+                    <ActivityIndicator size="small" color={COLORS.white} />
+                  ) : (
+                    "Upload"
+                  )}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        ) : (
+          // <TouchableOpacity
+          //   style={styles.option}
+          //   onPress={handleTakeSelfie}
+          //   accessibilityLabel="Take selfie with camera"
+          // >
+          //   <View style={styles.iconContainer}>
+          //     <MaterialCommunityIcons
+          //       name="camera-outline"
+          //       size={40}
+          //       color={COLORS.slate}
+          //     />
+          //   </View>
+          //   <Text style={styles.optionText}>Take Selfie{"\n"}with Camera</Text>
+          // </TouchableOpacity>
+
+          <View style={styles.buttonContainer}>
+            <UploadButton />
+          </View>
         )}
       </View>
     </View>
@@ -157,12 +205,12 @@ const styles = StyleSheet.create({
     color: COLORS.slate,
   },
   previewContainer: {
-    width: "100%",
-    height: 300,
+    width: 200,
+    height: 250,
     position: "relative",
     marginBottom: spacing.medium,
-    backgroundColor: COLORS.black,
     borderRadius: borderRadius.medium,
+    // backgroundColor: COLORS.black,
   },
   previewImage: {
     width: "100%",
@@ -171,16 +219,46 @@ const styles = StyleSheet.create({
     transform: [{ scaleX: -1 }],
     resizeMode: "cover",
     aspectRatio: 9 / 16,
-    backgroundColor: COLORS.black,
-    margin:"auto"
+    borderWidth: 1,
+    borderColor: COLORS.slate,
+    backgroundColor: COLORS.slate,
+    margin: "auto",
   },
-  closeButton: {
+  cameraCloseButton: {
     position: "absolute",
     top: 10,
     right: 10,
     backgroundColor: COLORS.slate,
     borderRadius: 20,
     padding: 5,
+  },
+  previewCloseButton: {
+    position: "absolute",
+    top: -20,
+    right: 10,
+    backgroundColor: COLORS.slate,
+    borderRadius: 20,
+    padding: 5,
+  },
+  buttonContainer: {
+    width: "100%",
+    gap: spacing.medium,
+    marginTop: spacing.large,
+    marginBottom: spacing.large,
+  },
+  button: {
+    width: "100%",
+    height: 48,
+    borderRadius: borderRadius.medium,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  uploadButton: {
+    backgroundColor: COLORS.slate,
+  },
+  uploadButtonText: {
+    color: COLORS.white,
+    fontSize: fontSize.medium,
   },
 });
 

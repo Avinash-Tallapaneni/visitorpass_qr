@@ -9,14 +9,14 @@ export default function RootLayout() {
   const visitorId = useVisitorRegistrationStore((state) => state.visitorId);
 
   useEffect(() => {
-    console.log("visitorId", visitorId);
+    // if (!visitorId) {
+    //   router.push("/");
+    // }
 
-    if (process.env.NODE_ENV === "development" && visitorId) {
+    if (process.env.NODE_ENV === "development") {
       router.push("/HomePage");
-    } else if (!visitorId) {
-      router.push("/");
     }
-  }, [visitorId]);
+  });
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
