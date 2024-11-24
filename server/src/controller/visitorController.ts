@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { nanoid } from "nanoid";
 import { db } from "../database";
 import { visitors } from "../database/schema";
 import {
@@ -19,7 +18,7 @@ export const createVisitor = async (req: Request, res: Response) => {
 
     const visitorData = {
       ...data,
-      id: nanoid(21),
+      id: crypto.randomUUID().slice(0, 21),
     };
 
     // @ts-ignore - Ignore type error for the returning() method
