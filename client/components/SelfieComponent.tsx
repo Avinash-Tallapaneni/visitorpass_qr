@@ -1,20 +1,19 @@
-import { Ionicons } from "@expo/vector-icons";
+import { uploadSelfie } from "@/api/visitorApi";
+import { borderRadius, COLORS, fontSize, spacing } from "@/constants";
+import { useVisitorRegistrationStore } from "@/store/VisitorRegistrationStore";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { CameraView, useCameraPermissions } from "expo-camera";
+import { router, useRouter } from "expo-router";
 import React, { useRef, useState } from "react";
 import {
-  StyleSheet,
-  TouchableOpacity,
-  View,
+  ActivityIndicator,
   Image,
   Modal,
-  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Text } from "react-native";
-import { borderRadius, COLORS, fontSize, spacing } from "@/constants";
-import { uploadSelfie } from "@/api/visitorApi";
-import { useVisitorRegistrationStore } from "@/store/VisitorRegistrationStore";
-import UploadButton from "./uploadButton";
 
 const SelfieComponent = () => {
   const [isCameraActive, setIsCameraActive] = useState(false);
@@ -23,6 +22,7 @@ const SelfieComponent = () => {
   const [permission, requestPermission] = useCameraPermissions();
   const { visitorId } = useVisitorRegistrationStore();
   const [isUploading, setIsUploading] = useState(false);
+  const router = useRouter();
 
   const handleTakeSelfie = () => {
     if (permission?.granted) {
@@ -44,7 +44,9 @@ const SelfieComponent = () => {
         id: visitorId,
         selfie: capturedSelfie,
       });
-      console.log(response.data);
+      if (response.status === 200) {
+        router.replace("/DocumentScreen");
+      }
       setIsUploading(false);
     }
   };
@@ -120,6 +122,7 @@ const SelfieComponent = () => {
                     "Upload"
                   )}
                 </Text>
+                
               </TouchableOpacity>
             </View>
           </>
@@ -138,10 +141,6 @@ const SelfieComponent = () => {
             </View>
             <Text style={styles.optionText}>Take Selfie{"\n"}with Camera</Text>
           </TouchableOpacity>
-
-          // <View style={styles.buttonContainer}>
-          //   <UploadButton />
-          // </View>
         )}
       </View>
     </View>
@@ -165,19 +164,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "flex-end",
-    paddingBottom: 30,
+    paddingBottom: spacing.large,
   },
   captureButton: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    width: spacing.xxxLarge,
+    height: spacing.xxxLarge,
+    borderRadius: spacing.xLarge,
     backgroundColor: "rgba(255, 255, 255, 0.3)",
     justifyContent: "center",
     alignItems: "center",
   },
   captureButtonInner: {
-    width: 60,
-    height: 60,
+    width: spacing.height,
+    height: spacing.height,
     borderRadius: 30,
     backgroundColor: "white",
   },

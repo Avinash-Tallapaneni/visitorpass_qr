@@ -9,12 +9,12 @@ export default function RootLayout() {
   const visitorId = useVisitorRegistrationStore((state) => state.visitorId);
 
   useEffect(() => {
-    // if (!visitorId) {
-    //   router.push("/");
-    // }
+    if (!visitorId) {
+      router.push("/");
+    }
 
     if (process.env.NODE_ENV === "development") {
-      router.push("/HomePage");
+      router.push("/ThankyouScreen");
     }
   });
 
@@ -23,7 +23,9 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="OTPAuth" options={{ headerShown: false }} />
-        <Stack.Screen name="HomePage" options={{ headerShown: false }} />
+        <Stack.Screen name="SelfieScreen" options={{ headerShown: false }} />
+        <Stack.Screen name="DocumentScreen" options={{ headerShown: false }} />
+        <Stack.Screen name="ThankyouScreen" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
     </GestureHandlerRootView>

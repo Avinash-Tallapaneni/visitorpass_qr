@@ -16,6 +16,6 @@ export const useVisitorRegistrationStore = create<{
   },
   setFormData: (newFormData) => set({ formData: newFormData }),
 
-  visitorId: "1PeQjLNuN3zqY40l5hDuv",
+  visitorId: "",
   setVisitorId: (newVisitorId) => set({ visitorId: newVisitorId }),
 }));

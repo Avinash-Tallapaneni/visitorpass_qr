@@ -1,10 +1,9 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
-import React from "react";
 import SelfieComponent from "@/components/SelfieComponent";
 import { COLORS, fontSize, spacing } from "@/constants";
-import DocumentComponent from "@/components/DocumentComponent";
+import React from "react";
+import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 
-const HomePage = () => {
+const SelfieScreen = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
@@ -12,14 +11,10 @@ const HomePage = () => {
         contentContainerStyle={styles.contentContainer}
       >
         <View style={styles.formContainer}>
-          <Text style={styles.title}>Upload Documents and Selfie</Text>
+          <Text style={styles.title}>Upload Selfie</Text>
 
           <View style={styles.optionsContainer}>
             <SelfieComponent />
-          </View>
-
-          <View style={styles.selfieContainer}>
-            <DocumentComponent />
           </View>
         </View>
       </ScrollView>
@@ -27,7 +22,7 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default SelfieScreen;
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -56,10 +51,5 @@ const styles = StyleSheet.create({
     width: "100%",
     gap: spacing.medium,
     marginBottom: spacing.large,
-  },
-  selfieContainer: {
-    width: "100%",
-    height: 400,
-    marginTop: spacing.medium,
   },
 });

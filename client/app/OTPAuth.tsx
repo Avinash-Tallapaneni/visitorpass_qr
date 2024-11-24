@@ -19,7 +19,7 @@ const OTPAuth = () => {
   const [error, setError] = useState("");
 
   const handleSubmit = () => {
-    router.replace("/DocumentUpload");
+    router.replace("/SelfieScreen");
   };
   const handleResendOtp = () => {};
   const handleOtpChange = (value: string, index: number) => {
