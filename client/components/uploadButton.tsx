@@ -3,10 +3,19 @@ import { openSettings } from "expo-linking";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function UploadButton() {
+  console.log(
+    "process.env.EXPO_PUBLIC_BACKEND_URL",
+    process.env.EXPO_PUBLIC_BACKEND_URL
+  );
   const { openImagePicker, isUploading } = useImageUploader("selfieUploader", {
-    onClientUploadComplete: () => Alert.alert("Upload Completed"),
+    onClientUploadComplete: (res) => {
+      if (res && res.length > 0) {
+        Alert.alert("Upload Completed");
+      }
+    },
     onUploadError: (error) => Alert.alert("Upload Error", error.message),
   });
+ 
 
   const handleImagePick = async () => {
     try {

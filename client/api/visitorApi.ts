@@ -8,6 +8,11 @@ interface UploadSelfieType {
   selfie: string;
 }
 
+interface UploadDocumentType {
+  id: string;
+  document: FormData;
+}
+
 if (!BASE_URL) {
   throw new Error("BACKEND_URL is not defined");
 }
@@ -29,10 +34,13 @@ export const registerVisitor = async (data: visitorRegistrationType) => {
 };
 
 export const uploadSelfie = async (data: UploadSelfieType) => {
-  console.log(`${BASE_URL}/api/fileupload`, `${BASE_URL}/api/fileupload`);
+  console.log(
+    `${BASE_URL}/api/fileupload`,
+    `${BASE_URL}/api/fileupload/selfie`
+  );
   try {
     const response = await axios.post(
-      `${BASE_URL}/api/fileupload`,
+      `${BASE_URL}/api/fileupload/selfie`,
       data,
       {
         headers: {
@@ -45,4 +53,13 @@ export const uploadSelfie = async (data: UploadSelfieType) => {
     console.error("Error uploading selfie:", error);
     throw error;
   }
+};
+
+export const uploadDocument = async ({ formData }: { formData: FormData }) => {
+  return await axios.post(`${BASE_URL}/api/fileupload/document`, formData, {
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "multipart/form-data",
+    },
+  });
 };

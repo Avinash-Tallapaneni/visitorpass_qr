@@ -1,5 +1,5 @@
 import { generateReactNativeHelpers } from "@uploadthing/expo";
-import type { OurFileRouter } from "../../server/src/routes/fileUploadRoute";
+import type { OurFileRouter } from "../../server/src/routes/bak.uploadthing";
 
 export const { useImageUploader, useDocumentUploader } =
   generateReactNativeHelpers<OurFileRouter>({

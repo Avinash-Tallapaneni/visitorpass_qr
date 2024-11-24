@@ -1,9 +1,8 @@
 import cors from "cors";
 import express, { Request, Response } from "express";
 import visitorRoute from "./routes/visitorRoute";
-import { createRouteHandler } from "uploadthing/express";
-import { fileUploadRouter } from "./routes/fileUploadRoute";
-import fileUploadRouter2 from "./routes/fileUploadRoute2";
+import fileUploadRouter from "./routes/fileUploadRoute";
+import qrRoute from "./routes/qrRoute";
 
 import { config } from "dotenv";
 
@@ -47,13 +46,9 @@ app.get("/health", (req: Request, res: Response) => {
 
 app.use("/api/visitors", visitorRoute);
 
-app.use(
-  "/api/fileUpload",
-  createRouteHandler({
-    router: fileUploadRouter,
-  })
-);
+ 
+app.use("/api/fileUpload", fileUploadRouter);
 
-// app.use("/api/fileUpload", fileUploadRouter2);
+app.use("/api/qr", qrRoute);
 
 export default app;

@@ -2,14 +2,24 @@ import { borderRadius, COLORS, fontSize, spacing } from "@/constants";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
+  Image,
 } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
+import { Ionicons } from "@expo/vector-icons";
+import { uploadDocument } from "@/api/visitorApi";
+import { useVisitorRegistrationStore } from "@/store/VisitorRegistrationStore";
+import * as FileSystem from "expo-file-system";
+
 const DocumentComponent = () => {
-  const [uploadedDocument, setUploadedDocument] = useState<string | null>(null);
+  const [uploadedDocument, setUploadedDocument] =
+    useState<DocumentPicker.DocumentPickerAsset | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const visitorId = useVisitorRegistrationStore((state) => state.visitorId);
 
   const handlePickDocument = async () => {
     try {
@@ -21,39 +31,108 @@ const DocumentComponent = () => {
 
       console.log(result);
 
+      if (result.assets?.[0]) {
+        const documentDetails = result.assets[0];
 
+        const fileToUpload = {
+          name: documentDetails.name,
+          size: documentDetails.size,
+          uri: documentDetails.uri,
+          type: documentDetails.mimeType,
+        };
 
-      // if (result.type === "success") {
-      //   setUploadedDocument(result.uri);
-      // }
+        setUploadedDocument(fileToUpload);
+      }
     } catch (err) {
       console.error("Error picking document:", err);
     }
   };
 
-  const handleUploadDocument = () => {
-     
+  const handleUpload = async () => {
+    if (!uploadedDocument || !visitorId) return;
+
+    try {
+      setIsUploading(true);
+
+      const formData = new FormData();
+      formData.append("document", {
+        uri: uploadedDocument.uri,
+        type: uploadedDocument.mimeType,
+        name: uploadedDocument.name,
+      } as any);
+      formData.append("id", visitorId);
+
+      console.log("formData really working", formData);
+
+      const response = await uploadDocument({ formData });
+
+      console.log("response really working", response);
+
+      console.log("Upload success:", response.data);
+      setIsUploading(false);
+    } catch (error) {
+      console.error("Error uploading:", error);
+      setIsUploading(false);
+    }
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.option}
-        onPress={handlePickDocument}
-        accessibilityLabel="Upload Document from your phone"
-      >
-        <View style={styles.iconContainer}>
-          <MaterialCommunityIcons
-            name="file-document-multiple-outline"
-            size={40}
-            color={COLORS.slate}
-          />
-        </View>
-        <Text style={styles.optionText}>
-          Upload Document{"\n"}from your phone
-        </Text>
-        
-      </TouchableOpacity>
+      {uploadedDocument ? (
+        <>
+          <View style={styles.previewContainer}>
+            <View style={styles.documentPreview}>
+              <MaterialCommunityIcons
+                name="file-pdf-box"
+                size={50}
+                color={COLORS.slate}
+              />
+              <Text style={styles.fileName} numberOfLines={1}>
+                {uploadedDocument.name}
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.previewCloseButton}
+              onPress={() => setUploadedDocument(null)}
+            >
+              <Ionicons name="close" size={30} color={COLORS.white} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[styles.button, styles.uploadButton]}
+              onPress={handleUpload}
+              accessibilityLabel="Upload photo"
+            >
+              <Text style={styles.uploadButtonText}>
+                {isUploading ? (
+                  <ActivityIndicator size="small" color={COLORS.white} />
+                ) : (
+                  "Upload"
+                )}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </>
+      ) : (
+        <TouchableOpacity
+          style={styles.option}
+          onPress={handlePickDocument}
+          accessibilityLabel="Upload Document from your phone"
+        >
+          <View style={styles.iconContainer}>
+            <MaterialCommunityIcons
+              name="file-document-multiple-outline"
+              size={40}
+              color={COLORS.slate}
+            />
+          </View>
+          <Text style={styles.optionText}>
+            Upload Document{"\n"}from your phone
+          </Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -157,6 +236,31 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderRadius: 20,
     padding: 5,
+  },
+  previewCloseButton: {
+    position: "absolute",
+    top: -20,
+    right: -10,
+    backgroundColor: COLORS.slate,
+    borderRadius: 20,
+    padding: 5,
+  },
+  documentPreview: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+    borderRadius: borderRadius.medium,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: spacing.medium,
+    borderWidth: 1,
+    borderColor: COLORS.slate,
+  },
+
+  fileName: {
+    marginTop: spacing.small,
+    fontSize: fontSize.medium,
+    color: COLORS.slate,
+    textAlign: "center",
   },
 });
 

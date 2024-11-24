@@ -24,13 +24,13 @@ const SelfieComponent = () => {
   const { visitorId } = useVisitorRegistrationStore();
   const [isUploading, setIsUploading] = useState(false);
 
-  // const handleTakeSelfie = () => {
-  //   if (permission?.granted) {
-  //     setIsCameraActive(true);
-  //   } else {
-  //     requestPermission();
-  //   }
-  // };
+  const handleTakeSelfie = () => {
+    if (permission?.granted) {
+      setIsCameraActive(true);
+    } else {
+      requestPermission();
+    }
+  };
 
   const handleClose = () => {
     setIsCameraActive(false);
@@ -124,24 +124,24 @@ const SelfieComponent = () => {
             </View>
           </>
         ) : (
-          // <TouchableOpacity
-          //   style={styles.option}
-          //   onPress={handleTakeSelfie}
-          //   accessibilityLabel="Take selfie with camera"
-          // >
-          //   <View style={styles.iconContainer}>
-          //     <MaterialCommunityIcons
-          //       name="camera-outline"
-          //       size={40}
-          //       color={COLORS.slate}
-          //     />
-          //   </View>
-          //   <Text style={styles.optionText}>Take Selfie{"\n"}with Camera</Text>
-          // </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.option}
+            onPress={handleTakeSelfie}
+            accessibilityLabel="Take selfie with camera"
+          >
+            <View style={styles.iconContainer}>
+              <MaterialCommunityIcons
+                name="camera-outline"
+                size={40}
+                color={COLORS.slate}
+              />
+            </View>
+            <Text style={styles.optionText}>Take Selfie{"\n"}with Camera</Text>
+          </TouchableOpacity>
 
-          <View style={styles.buttonContainer}>
-            <UploadButton />
-          </View>
+          // <View style={styles.buttonContainer}>
+          //   <UploadButton />
+          // </View>
         )}
       </View>
     </View>
