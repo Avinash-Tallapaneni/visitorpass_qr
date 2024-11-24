@@ -8,17 +8,11 @@ interface UploadSelfieType {
   selfie: string;
 }
 
-interface UploadDocumentType {
-  id: string;
-  document: FormData;
-}
-
 if (!BASE_URL) {
   throw new Error("BACKEND_URL is not defined");
 }
 
 export const registerVisitor = async (data: visitorRegistrationType) => {
-  console.log(`{BASE_URL}/api/visitors`, `${BASE_URL}/api/visitors`);
   try {
     const response = await axios.post(`${BASE_URL}/api/visitors`, data, {
       headers: {
@@ -34,10 +28,6 @@ export const registerVisitor = async (data: visitorRegistrationType) => {
 };
 
 export const uploadSelfie = async (data: UploadSelfieType) => {
-  console.log(
-    `${BASE_URL}/api/fileupload`,
-    `${BASE_URL}/api/fileupload/selfie`
-  );
   try {
     const response = await axios.post(
       `${BASE_URL}/api/fileupload/selfie`,
@@ -55,11 +45,21 @@ export const uploadSelfie = async (data: UploadSelfieType) => {
   }
 };
 
-export const uploadDocument = async ({ formData }: { formData: FormData }) => {
-  return await axios.post(`${BASE_URL}/api/fileupload/document`, formData, {
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "multipart/form-data",
-    },
-  });
+export const uploadDocument = async (formData: FormData) => {
+  try {
+    const response = await axios.post(
+      `${BASE_URL}/api/fileUpload/document`,
+      formData,
+      {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading document in api:", error);
+    throw error;
+  }
 };

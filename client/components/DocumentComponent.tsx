@@ -1,23 +1,30 @@
+import { uploadDocument } from "@/api/visitorApi";
 import { borderRadius, COLORS, fontSize, spacing } from "@/constants";
+import { useVisitorRegistrationStore } from "@/store/VisitorRegistrationStore";
+import { Ionicons } from "@expo/vector-icons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import * as DocumentPicker from "expo-document-picker";
+import mime from "mime";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  Image,
 } from "react-native";
-import * as DocumentPicker from "expo-document-picker";
-import { Ionicons } from "@expo/vector-icons";
-import { uploadDocument } from "@/api/visitorApi";
-import { useVisitorRegistrationStore } from "@/store/VisitorRegistrationStore";
-import * as FileSystem from "expo-file-system";
+
+interface uploadedDocumentProps {
+  name: string;
+  size: number;
+  type: string;
+  uri: string;
+}
 
 const DocumentComponent = () => {
   const [uploadedDocument, setUploadedDocument] =
-    useState<DocumentPicker.DocumentPickerAsset | null>(null);
+    useState<uploadedDocumentProps | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const visitorId = useVisitorRegistrationStore((state) => state.visitorId);
 
@@ -29,16 +36,16 @@ const DocumentComponent = () => {
         multiple: false,
       });
 
-      console.log(result);
-
       if (result.assets?.[0]) {
         const documentDetails = result.assets[0];
 
+        const mimeType = mime.getType(documentDetails.mimeType!);
+
         const fileToUpload = {
           name: documentDetails.name,
-          size: documentDetails.size,
+          size: documentDetails.size!,
           uri: documentDetails.uri,
-          type: documentDetails.mimeType,
+          type: "application/pdf",
         };
 
         setUploadedDocument(fileToUpload);
@@ -55,20 +62,20 @@ const DocumentComponent = () => {
       setIsUploading(true);
 
       const formData = new FormData();
+
       formData.append("document", {
-        uri: uploadedDocument.uri,
-        type: uploadedDocument.mimeType,
+        uri:
+          Platform.OS === "android"
+            ? uploadedDocument.uri
+            : uploadedDocument.uri.replace("file://", ""),
+        type: uploadedDocument.type,
         name: uploadedDocument.name,
       } as any);
-      formData.append("id", visitorId);
 
-      console.log("formData really working", formData);
+      formData.append("visitorId", visitorId);
 
-      const response = await uploadDocument({ formData });
+      const response = await uploadDocument(formData);
 
-      console.log("response really working", response);
-
-      console.log("Upload success:", response.data);
       setIsUploading(false);
     } catch (error) {
       console.error("Error uploading:", error);

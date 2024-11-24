@@ -27,8 +27,6 @@ export const sendMail = async (to: string, qrCodeUrl: string) => {
   };
 
   try {
-    console.log("mailOptions", mailOptions);
-
     await transporter.sendMail(mailOptions);
     return { success: true, message: "Email sent successfully" };
   } catch (error) {

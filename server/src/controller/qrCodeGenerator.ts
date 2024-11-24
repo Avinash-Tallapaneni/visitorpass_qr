@@ -30,12 +30,9 @@ export const generateQR = async (visitorId: string) => {
       email: visitor.email,
       phoneNumber: visitor.phoneNumber,
       visitingPersonName: visitor.visitingPersonName,
-      avatar: visitor.avatar,
       role: visitor.role,
       visitorId: visitorId,
     });
-
-    console.log("qrData", qrData);
 
     const qrCodeUrl = await QRCode.toDataURL(qrData);
 
@@ -50,7 +47,6 @@ export const generateQR = async (visitorId: string) => {
       throw new Error("Failed to send email");
     }
     console.log("mailSent", mailSent);
-    
 
     return qrCodeUrl;
   } catch (err) {
